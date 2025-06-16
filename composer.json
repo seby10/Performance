@@ -1,0 +1,11 @@
+{
+    "name": "sebas/performance",
+    "autoload": {
+        "psr-4": {
+            "Sebas\\Performance\\": "src/"
+        }
+    },
+    "require": {
+        "fakerphp/faker": "^1.24"
+    }
+}

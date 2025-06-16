@@ -1,6 +1,6 @@
 <?php
 require_once '../models/UnitOfWork.php';
-require_once '../conexion.php';
+require_once '../models/Conexion.php';
 
 class VentasController
 {
