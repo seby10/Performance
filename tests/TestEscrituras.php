@@ -2,7 +2,7 @@
 require_once '../vendor/autoload.php';
 require_once '../src/models/conexion.php';
 
-class PerformanceTest {
+class TestEscrituras {
     private $faker;
     private $db;
     private $startTime;
@@ -30,58 +30,69 @@ class PerformanceTest {
     }
 
     public function generateTestData() {
-        $this->startTimer();
-        for ($i = 0; $i < 100; $i++) {
-            $sql = "INSERT INTO CLIENTES VALUES (?, ?, ?, ?, ?)";
-            $this->db->prepare($sql)->execute([
-                $this->faker->unique()->numerify('##########'),
-                $this->faker->firstName(),
-                $this->faker->lastName(),
-                $this->faker->address(),
-                $this->faker->phoneNumber()
-            ]);
-        }
-        $this->endTimer('Generar 100 clientes');
+        // Limpiar tablas primero para pruebas consistentes
+        $this->db->exec("DELETE FROM DETALLE_VENTAS");
+        $this->db->exec("DELETE FROM MAESTRO_VENTAS");
+        $this->db->exec("DELETE FROM PRODUCTOS");
+        $this->db->exec("DELETE FROM CLIENTES");
 
         $this->startTimer();
-        for ($i = 0; $i < 1000; $i++) {
+        // Insertar un cliente de prueba
+        $sql = "INSERT INTO CLIENTES VALUES (?, ?, ?, ?, ?)";
+        $this->db->prepare($sql)->execute([
+            '1234567890',
+            'Cliente',
+            'De Prueba',
+            'Dirección de prueba',
+            '0999999999'
+        ]);
+        $this->endTimer('Generar cliente de prueba');
+
+        $this->startTimer();
+        // Insertar 15 productos de prueba (uno para cada detalle)
+        $productos = [];
+        for ($i = 1; $i <= 15; $i++) {
+            $codigo = 'PROD' . str_pad($i, 5, '0', STR_PAD_LEFT);
             $sql = "INSERT INTO PRODUCTOS VALUES (?, ?, ?, ?, ?)";
             $this->db->prepare($sql)->execute([
-                $this->faker->unique()->bothify('PROD#####'),
-                $this->faker->words(3, true),
-                $this->faker->company(),
+                $codigo,
+                "Producto $i",
+                "Fabricante $i",
                 $this->faker->numberBetween(10, 1000),
                 $this->faker->numberBetween(0, 100)
             ]);
+            $productos[] = $codigo;
         }
-        $this->endTimer('Generar 1000 productos');
+        $this->endTimer('Generar 15 productos');
+        
+        return $productos;
     }
 
-    public function generateOrders($numberOfOrders) {
-        $this->startTimer();
-        $clientes = $this->db->query("SELECT CED_CLI FROM CLIENTES")->fetchAll(PDO::FETCH_COLUMN);
-        $productos = $this->db->query("SELECT COD_PRO FROM PRODUCTOS")->fetchAll(PDO::FETCH_COLUMN);
+    public function testOrderInsertionPerformance() {
+        $productos = $this->generateTestData();
+        $cedulaCliente = '1234567890';
 
-        for ($i = 0; $i < $numberOfOrders; $i++) {
+        // Insertar 15 órdenes con 1 a 15 detalles cada una
+        for ($detalles = 1; $detalles <= 15; $detalles++) {
+            $this->startTimer();
+            
             $this->db->beginTransaction();
             try {
                 // Insertar maestro
                 $sql = "INSERT INTO MAESTRO_VENTAS (FEC_FAC, CED_CLI_VEN, TOTAL, ESTADO) VALUES (?, ?, ?, ?)";
                 $stmt = $this->db->prepare($sql);
                 $stmt->execute([
-                    $this->faker->date(),
-                    $clientes[array_rand($clientes)],
+                    date('Y-m-d'),
+                    $cedulaCliente,
                     0,
                     'A'
                 ]);
                 $facturaId = $this->db->lastInsertId();
 
-                // Insertar detalles
-                $numDetalles = min(($i % 15) + 1, count($productos));
-                
-                for ($j = 0; $j < $numDetalles; $j++) {
-                    $producto = $productos[array_rand($productos)];
-                    $cantidad = $this->faker->numberBetween(1, 5);
+                // Insertar detalles (1 a 15 según la iteración)
+                for ($j = 0; $j < $detalles; $j++) {
+                    $producto = $productos[$j]; // Usamos productos secuenciales
+                    $cantidad = 1; // Cantidad fija para simplificar
                     
                     $sql = "INSERT INTO DETALLE_VENTAS VALUES (?, ?, ?)";
                     $stmt = $this->db->prepare($sql);
@@ -89,34 +100,16 @@ class PerformanceTest {
                 }
 
                 $this->db->commit();
+                $this->endTimer("Insertar orden con $detalles detalles");
             } catch (Exception $e) {
                 $this->db->rollBack();
-                echo "Error en orden $i: " . $e->getMessage() . "\n";
+                echo "Error en orden con $detalles detalles: " . $e->getMessage() . "\n";
             }
-        }
-        $this->endTimer("Generar $numberOfOrders órdenes");
-    }
-
-    public function testReportPerformance() {
-        $orderCounts = [100, 1000, 4000, 10000, 20000, 60000, 100000];
-
-        foreach ($orderCounts as $count) {
-            $this->startTimer();
-            $sql = "SELECT m.NUM_FAC, m.FEC_FAC, c.NOM_CLI, 
-                           d.COD_PRO_VEN, p.NOM_PRO, d.CANTIDAD
-                    FROM MAESTRO_VENTAS m
-                    JOIN CLIENTES c ON m.CED_CLI_VEN = c.CED_CLI
-                    JOIN DETALLE_VENTAS d ON m.NUM_FAC = d.NUM_FAC_PER
-                    JOIN PRODUCTOS p ON d.COD_PRO_VEN = p.COD_PRO
-                    LIMIT $count";
-            
-            $result = $this->db->query($sql);
-            $this->endTimer("Reporte con $count órdenes");
         }
     }
 
     public function printResults() {
-        echo "\nResultados de las pruebas de performance:\n";
+        echo "\nResultados de las pruebas de performance (escritura):\n";
         echo str_repeat("-", 70) . "\n";
         echo sprintf("%-30s | %-20s | %-15s\n", "Operación", "Tiempo (ms)", "Memoria (MB)");
         echo str_repeat("-", 70) . "\n";
