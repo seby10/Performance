@@ -8,7 +8,6 @@ class TestLecturas
     private $db;
     private $startTime;
     private $results = [];
-    private $batchSize = 1000; // Para inserciones por lotes
 
     public function __construct()
     {
@@ -40,24 +39,19 @@ class TestLecturas
         $orderCounts = [100, 1000, 4000, 10000, 20000, 60000, 100000, 1000000];
 
         foreach ($orderCounts as $count) {
-            // Consulta 1: Reporte maestro-detalle básico (optimizado para memoria)
             $this->startTimer();
-            $sql = "SELECT m.NUM_FAC, m.FEC_FAC, c.NOM_CLI, 
+            $sql = "SELECT m.NUM_FAC, m.FEC_FAC, c.NOM_CLI, c.APE_CLI,
                        d.COD_PRO_VEN, p.NOM_PRO, d.CANTIDAD
-                FROM MAESTRO_VENTAS m
-                JOIN CLIENTES c ON m.CED_CLI_VEN = c.CED_CLI
-                JOIN DETALLE_VENTAS d ON m.NUM_FAC = d.NUM_FAC_PER
-                JOIN PRODUCTOS p ON d.COD_PRO_VEN = p.COD_PRO
-                LIMIT $count";
+                    FROM MAESTRO_VENTAS m
+                    JOIN CLIENTES c ON m.CED_CLI_VEN = c.CED_CLI
+                    JOIN DETALLE_VENTAS d ON m.NUM_FAC = d.NUM_FAC_PER
+                    JOIN PRODUCTOS p ON d.COD_PRO_VEN = p.COD_PRO
+                    LIMIT $count";
 
-            // Usar fetch() en lugar de fetchAll() para procesar filas una por una
             $stmt = $this->db->prepare($sql);
             $stmt->execute();
 
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                // Procesar cada fila individualmente sin almacenar todo en memoria
-                // Puedes comentar esto si solo quieres medir el tiempo de ejecución
-                // $dummy = $row['NUM_FAC']; // Solo para asegurar que se procesa
+            while ($stmt->fetch(PDO::FETCH_ASSOC)) {
             }
             $this->endTimer("Reporte básico ($count detalles)");
         }

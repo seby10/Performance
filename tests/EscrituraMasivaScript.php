@@ -7,7 +7,7 @@ class EscrituraMasivaScript {
     private $db;
     private $startTime;
     private $results = [];
-    private $batchSize = 1000; // Para inserciones por lotes
+    private $batchSize = 1000;
 
     public function __construct() {
         $this->faker = Faker\Factory::create('es_ES');
@@ -32,16 +32,9 @@ class EscrituraMasivaScript {
     }
 
     public function generateMassiveTestData($totalOrders) {
-        // 1. Limpiar tablas existentes
         $this->cleanTables();
-        
-        // 2. Generar clientes (100 clientes)
         $this->generateClients(100);
-        
-        // 3. Generar productos (1000 productos)
-        $this->generateProducts(1000);
-        
-        // 4. Generar órdenes masivas
+        $this->generateProducts(1000);        
         $this->generateMassiveOrders($totalOrders);
     }
 
@@ -152,7 +145,6 @@ class EscrituraMasivaScript {
                 $detailsCount = 0;
                 
                 foreach ($orderIds as $orderId) {
-                    // Entre 1 y 20 detalles por orden (promedio 10)
                     $numDetails = rand(1, 20);
                     
                     for ($j = 0; $j < $numDetails; $j++) {
