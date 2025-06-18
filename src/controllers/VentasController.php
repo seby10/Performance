@@ -54,10 +54,10 @@ class VentasController
         }
     }
 
-    public function getReportVentas()
+    public function getReportVentas($limit)
     {
         try {
-            $ventas = $this->unitOfWork->getVentasRepository()->getReportVentas();
+            $ventas = $this->unitOfWork->getVentasRepository()->getReportVentas($limit);
             echo json_encode(['success' => true, 'data' => $ventas]);
         } catch (Exception $e) {
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);

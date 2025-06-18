@@ -48,21 +48,44 @@ class VentasRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getReportVentas()
+    public function getReportVentas($limit)
     {
-        $sql = "SELECT mv.NUM_FAC, mv.FEC_FAC, mv.TOTAL, mv.ESTADO,
-                       c.NOM_CLI, c.APE_CLI,
-                       dv.CANTIDAD, p.NOM_PRO, p.PRE_UNI_PRO
-                FROM MAESTRO_VENTAS mv
-                JOIN CLIENTES c ON mv.CED_CLI_VEN = c.CED_CLI
-                JOIN DETALLE_VENTAS dv ON mv.NUM_FAC = dv.NUM_FAC_PER
-                JOIN PRODUCTOS p ON dv.COD_PRO_VEN = p.COD_PRO";
-
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute();
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $ventas[] = $row;
+        if ($limit > 100000) {
+            ini_set('memory_limit', '2048M');
+            ini_set('max_execution_time', 300);
         }
-        return $ventas ?? [];
+
+        $ventas = [];
+        $sql = "SELECT SQL_NO_CACHE mv.NUM_FAC, mv.FEC_FAC, mv.TOTAL, mv.ESTADO,
+                   c.NOM_CLI, c.APE_CLI,
+                   dv.CANTIDAD, p.NOM_PRO, p.PRE_UNI_PRO
+            FROM MAESTRO_VENTAS mv
+            STRAIGHT_JOIN CLIENTES c ON mv.CED_CLI_VEN = c.CED_CLI
+            STRAIGHT_JOIN DETALLE_VENTAS dv ON mv.NUM_FAC = dv.NUM_FAC_PER
+            STRAIGHT_JOIN PRODUCTOS p ON dv.COD_PRO_VEN = p.COD_PRO
+            LIMIT ?";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(1, $limit, PDO::PARAM_INT);
+            $stmt->execute();
+
+            $this->db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $ventas[] = $row;
+
+                if (count($ventas) % 10000 === 0) {
+                    gc_collect_cycles();
+                }
+            }
+
+            return $ventas;
+        } catch (PDOException $e) {
+            error_log("Error en getReportVentas: " . $e->getMessage());
+            return [];
+        } finally {
+            $this->db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+        }
     }
 }

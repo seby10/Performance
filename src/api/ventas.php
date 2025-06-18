@@ -10,7 +10,7 @@ switch ($method) {
         if (isset($_GET['numero'])) {
             $controller->getVenta($_GET['numero']);
         } else {
-            $controller->getReportVentas();
+            $controller->getReportVentas($_GET['limite'] ?? 10000);
         }
         break;
     case 'POST':

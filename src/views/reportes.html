@@ -16,7 +16,7 @@
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link active" href="clientes.html">Clientes</a>
+                        <a class="nav-link" href="clientes.html">Clientes</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="productos.html">Productos</a>
@@ -25,7 +25,7 @@
                         <a class="nav-link" href="index.html">Ventas</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="reportes.html">Reportes</a>
+                        <a class="nav-link active" href="reportes.html">Reportes</a>
                     </li>
                 </ul>
             </div>
@@ -35,6 +35,22 @@
     <div class="container mt-4">
         <div class="d-flex justify-content-between mb-3">
             <h2>Reportes de Venta</h2>
+        </div>
+        <div class="dropdown mb-3">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownLimite"
+                data-bs-toggle="dropdown" aria-expanded="false">
+                Cantidad de Registros
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownLimite">
+                <a class="dropdown-item" href="#" data-value="100">100</a>
+                <a class="dropdown-item" href="#" data-value="1000">1000</a>
+                <a class="dropdown-item" href="#" data-value="10000">10000</a>
+                <a class="dropdown-item" href="#" data-value="20000">20000</a>
+                <a class="dropdown-item" href="#" data-value="60000">60000</a>
+                <a class="dropdown-item" href="#" data-value="100000">100000</a>
+                <a class="dropdown-item" href="#" data-value="1000000">1000000</a>
+            </div>
+            <input type="hidden" id="limite" value="1000">
         </div>
 
         <table class="table table-striped">

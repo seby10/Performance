@@ -1,4 +1,3 @@
-// filepath: c:\xampp\htdocs\Performance\ajax\clientes.js
 let clienteModal;
 let clientes = [];
 let clientesPorPagina = 10;

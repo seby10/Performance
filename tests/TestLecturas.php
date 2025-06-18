@@ -42,10 +42,10 @@ class TestLecturas
             $this->startTimer();
             $sql = "SELECT m.NUM_FAC, m.FEC_FAC, c.NOM_CLI, c.APE_CLI,
                        d.COD_PRO_VEN, p.NOM_PRO, d.CANTIDAD
-                    FROM MAESTRO_VENTAS m
-                    JOIN CLIENTES c ON m.CED_CLI_VEN = c.CED_CLI
-                    JOIN DETALLE_VENTAS d ON m.NUM_FAC = d.NUM_FAC_PER
-                    JOIN PRODUCTOS p ON d.COD_PRO_VEN = p.COD_PRO
+                    FROM MAESTRO_VENTAS m FORCE INDEX (PRIMARY)
+                    STRAIGHT_JOIN CLIENTES c ON m.CED_CLI_VEN = c.CED_CLI
+                    STRAIGHT_JOIN DETALLE_VENTAS d ON m.NUM_FAC = d.NUM_FAC_PER
+                    STRAIGHT_JOIN PRODUCTOS p ON d.COD_PRO_VEN = p.COD_PRO
                     LIMIT $count";
 
             $stmt = $this->db->prepare($sql);
