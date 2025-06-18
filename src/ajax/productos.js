@@ -1,6 +1,9 @@
 let productoModal;
+let productos = [];
+let productosPorPagina = 10;
+let paginaActual = 1;
 
-$(document).ready(function() {
+$(document).ready(function () {
     productoModal = new bootstrap.Modal(document.getElementById('productoModal'));
     cargarProductos();
 });
@@ -9,29 +12,80 @@ function cargarProductos() {
     $.ajax({
         url: '../api/productos.php',
         type: 'GET',
-        success: function(response) {
+        success: function (response) {
             if (response.success) {
-                let html = '';
-                response.data.forEach(producto => {
-                    html += `
-                        <tr>
-                            <td>${producto.COD_PRO}</td>
-                            <td>${producto.NOM_PRO}</td>
-                            <td>${producto.MAR_PRO}</td>
-                            <td>${producto.PRE_UNI_PRO}</td>
-                            <td>${producto.EXISTENCIA}</td>
-                        </tr>
-                    `;
-                });
-                $('#productosTableBody').html(html);
+                productos = response.data;
+                paginaActual = 1; // Reiniciar a la primera página
+                mostrarProductosPaginados();
+                generarPaginacion();
             } else {
                 alert('Error al cargar productos: ' + response.message);
             }
         },
-        error: function() {
+        error: function () {
             alert('Error al conectar con el servidor');
         }
     });
+}
+
+function mostrarProductosPaginados() {
+    const inicio = (paginaActual - 1) * productosPorPagina;
+    const fin = inicio + productosPorPagina;
+    const productosPagina = productos.slice(inicio, fin);
+
+    let html = '';
+    productosPagina.forEach(producto => {
+        html += `
+            <tr>
+                <td>${producto.COD_PRO}</td>
+                <td>${producto.NOM_PRO}</td>
+                <td>${producto.MAR_PRO}</td>
+                <td>${producto.PRE_UNI_PRO}</td>
+                <td>${producto.EXISTENCIA}</td>
+            </tr>
+        `;
+    });
+    $('#productosTableBody').html(html);
+}
+
+function generarPaginacion() {
+  const totalPaginas = Math.ceil(productos.length / productosPorPagina);
+
+  // Texto central: Página X de Y
+  $("#pagina-actual").text(`Página ${paginaActual} de ${totalPaginas}`);
+
+  // Habilitar/deshabilitar botones
+  $("#prev-page").toggleClass("disabled", paginaActual <= 1);
+  $("#next-page").toggleClass("disabled", paginaActual >= totalPaginas);
+
+  // Eventos de navegación
+  $("#prev-page a")
+    .off("click")
+    .on("click", function (e) {
+      e.preventDefault();
+      if (paginaActual > 1) {
+        paginaActual--;
+        mostrarProductosPaginados();
+        generarPaginacion();
+      }
+    });
+
+  $("#next-page a")
+    .off("click")
+    .on("click", function (e) {
+      e.preventDefault();
+      if (paginaActual < totalPaginas) {
+        paginaActual++;
+        mostrarProductosPaginados();
+        generarPaginacion();
+      }
+    });
+}
+
+function cambiarPagina(pagina) {
+    paginaActual = pagina;
+    mostrarProductosPaginados();
+    generarPaginacion();
 }
 
 function showProductoModal() {

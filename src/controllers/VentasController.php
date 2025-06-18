@@ -53,4 +53,14 @@ class VentasController
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
     }
+
+    public function getReportVentas()
+    {
+        try {
+            $ventas = $this->unitOfWork->getVentasRepository()->getReportVentas();
+            echo json_encode(['success' => true, 'data' => $ventas]);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
 }

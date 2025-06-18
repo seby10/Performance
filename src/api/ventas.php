@@ -1,4 +1,4 @@
-<?php      
+<?php
 header('Content-Type: application/json');
 require_once '../controllers/VentasController.php';
 
@@ -9,6 +9,8 @@ switch ($method) {
     case 'GET':
         if (isset($_GET['numero'])) {
             $controller->getVenta($_GET['numero']);
+        } else {
+            $controller->getReportVentas();
         }
         break;
     case 'POST':

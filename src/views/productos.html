@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="utf-8">
     <title>Gestión de Productos</title>
@@ -7,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
+
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
@@ -22,6 +24,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="index.html">Ventas</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="reportes.html">Reportes</a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -30,11 +35,10 @@
     <div class="container mt-4">
         <div class="d-flex justify-content-between mb-3">
             <h2>Gestión de Productos</h2>
-            <button class="btn btn-primary" onclick="showProductoModal()">
+            <button type="button" class="btn btn-primary" onclick="showProductoModal()">
                 <i class="fas fa-plus"></i> Nuevo Producto
             </button>
         </div>
-
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -47,6 +51,17 @@
             </thead>
             <tbody id="productosTableBody"></tbody>
         </table>
+        <div class="d-flex justify-content-center align-items-center mt-4">
+            <ul class="pagination mb-0">
+                <li class="page-item" id="prev-page"><a class="page-link" href="#"><span
+                            aria-hidden="true">&laquo;</span><span class="sr-only">Previous</span></a></li>
+                <li class="page-item">
+                    <span class="page-link" id="pagina-actual">Página 1 de 1</span>
+                </li>
+                <li class="page-item" id="next-page"><a class="page-link" href="#"><span
+                            aria-hidden="true">&raquo;</span><span class="sr-only">Next</span></a></li>
+            </ul>
+        </div>
     </div>
 
     <!-- Modal Producto -->
@@ -93,4 +108,5 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../ajax/productos.js"></script>
 </body>
+
 </html>
