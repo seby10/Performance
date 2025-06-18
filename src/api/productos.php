@@ -7,7 +7,11 @@ $controller = new ProductosController();
 $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
     case 'GET':
-        $controller->getAll();
+        if (isset($_GET['codigo'])) {
+            $controller->getByCodigo();
+        } else {
+            $controller->getAll();
+        }
         break;
     case 'POST':
         $controller->create();

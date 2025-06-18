@@ -18,6 +18,22 @@ class ClientesController {
         }
     }
 
+    public function getByCedula(){
+        try {
+            $cedula = isset($_GET['cedula']) ? $_GET['cedula'] : null;
+            if (!$cedula) {
+                throw new Exception('Cedula del cliente es requerido');
+            }
+            $cliente = $this->unitOfWork->getClientesRepository()->getBycedula($cedula);
+            if (!$cliente) {
+                throw new Exception('Cliente no encontrado');
+            }
+            echo json_encode(['success' => true, 'data' => $cliente]);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
     public function create() {
         try {
             $data = json_decode(file_get_contents('php://input'), true);

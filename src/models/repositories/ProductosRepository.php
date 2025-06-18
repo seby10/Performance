@@ -14,7 +14,7 @@ class ProductosRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getById($codigo)
+    public function getByCodigo($codigo)
     {
         $stmt = $this->db->prepare("SELECT * FROM PRODUCTOS WHERE COD_PRO = :codigo");
         $stmt->execute(['codigo' => $codigo]);

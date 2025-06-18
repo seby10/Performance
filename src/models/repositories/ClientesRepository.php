@@ -14,7 +14,7 @@ class ClientesRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getById($cedula)
+    public function getByCedula($cedula)
     {
         $stmt = $this->db->prepare("SELECT * FROM CLIENTES WHERE CED_CLI = :cedula");
         $stmt->execute(['cedula' => $cedula]);

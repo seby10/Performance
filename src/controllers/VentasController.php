@@ -1,7 +1,6 @@
 <?php
 require_once '../models/UnitOfWork.php';
 require_once '../models/Conexion.php';
-
 class VentasController
 {
     private $unitOfWork;
@@ -16,33 +15,31 @@ class VentasController
         try {
             $data = json_decode(file_get_contents('php://input'), true);
 
-            $this->unitOfWork->beginTransaction();
+            // No need for explicit transaction as stored procedures handle it
 
-            // Crear maestro
+            // Crear maestro usando stored procedure
             $numeroFactura = $this->unitOfWork->getVentasRepository()->createMaestro([
-                'fecha' => date('Y-m-d'),
-                'cedula' => $data['cedula'],
-                'total' => $data['total']
+                'cedula' => $data['cedula']
             ]);
 
-            // Crear detalle y actualizar stock
+            // Crear detalle usando stored procedure
             foreach ($data['detalle'] as $item) {
                 $this->unitOfWork->getVentasRepository()->createDetalle([
                     'codigo_producto' => $item['codigo_producto'],
                     'cantidad' => $item['cantidad'],
                     'numero_factura' => $numeroFactura
                 ]);
-
-                $this->unitOfWork->getProductosRepository()->updateStock(
-                    $item['codigo_producto'],
-                    $item['cantidad']
-                );
             }
 
-            $this->unitOfWork->commit();
-            echo json_encode(['success' => true, 'message' => 'Venta creada exitosamente']);
+            // Cerrar la factura
+            $this->unitOfWork->getVentasRepository()->cerrarFactura($numeroFactura);
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Venta creada exitosamente',
+                'numeroFactura' => $numeroFactura
+            ]);
         } catch (Exception $e) {
-            $this->unitOfWork->rollback();
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
     }

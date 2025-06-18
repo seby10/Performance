@@ -18,6 +18,22 @@ class ProductosController {
         }
     }
 
+    public function getByCodigo(){
+        try {
+            $codigo = isset($_GET['codigo']) ? $_GET['codigo'] : null;
+            if (!$codigo) {
+                throw new Exception('Código de producto es requerido');
+            }
+            $producto = $this->unitOfWork->getProductosRepository()->getByCodigo($codigo);
+            if (!$producto) {
+                throw new Exception('Producto no encontrado');
+            }
+            echo json_encode(['success' => true, 'data' => $producto]);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
     public function create() {
         try {
             $data = json_decode(file_get_contents('php://input'), true);

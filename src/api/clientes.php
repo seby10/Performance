@@ -7,7 +7,11 @@ $controller = new ClientesController();
 $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
     case 'GET':
-        $controller->getAll();
+        if (isset($_GET['cedula'])) {
+            $controller->getByCedula();
+        } else {
+            $controller->getAll();
+        }
         break;
     case 'POST':
         $controller->create();

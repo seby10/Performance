@@ -1,48 +1,49 @@
 <?php
-class VentasRepository {
+class VentasRepository 
+{
     private $db;
 
-    public function __construct(PDO $db) {
+    public function __construct($db) {
         $this->db = $db;
     }
 
-    public function createMaestro($data) {
-        $stmt = $this->db->prepare("INSERT INTO MAESTRO_VENTAS (FEC_FAC, CED_CLI_VEN, TOTAL, ESTADO) 
-                                   VALUES (:fecha, :cedula, :total, :estado)");
+    public function createMaestro($data)
+    {
+        $stmt = $this->db->prepare("CALL ABRIR_FACTURA(?)");
+        $stmt->execute([$data['cedula']]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['NUM_FAC'];
+    }
+
+    public function createDetalle($data)
+    {
+        $stmt = $this->db->prepare("CALL INSERTAR_DETALLE(?, ?, ?)");
         $stmt->execute([
-            'fecha' => $data['fecha'],
-            'cedula' => $data['cedula'],
-            'total' => $data['total'],
-            'estado' => 'A'
-        ]);
-        return $this->db->lastInsertId();
-    }
-
-    public function createDetalle($data) {
-        $stmt = $this->db->prepare("INSERT INTO DETALLE_VENTAS (COD_PRO_VEN, CANTIDAD, NUM_FAC_PER) 
-                                   VALUES (:codigo_producto, :cantidad, :numero_factura)");
-        return $stmt->execute([
-            'codigo_producto' => $data['codigo_producto'],
-            'cantidad' => $data['cantidad'],
-            'numero_factura' => $data['numero_factura']
+            $data['codigo_producto'],
+            $data['cantidad'],
+            $data['numero_factura']
         ]);
     }
 
-    public function getVentaCompleta($numeroFactura) {
-        $maestro = $this->db->prepare("SELECT * FROM MAESTRO_VENTAS WHERE NUM_FAC = :numero");
-        $maestro->execute(['numero' => $numeroFactura]);
-        $resultMaestro = $maestro->fetch(PDO::FETCH_ASSOC);
+    public function cerrarFactura($numeroFactura)
+    {
+        $stmt = $this->db->prepare("CALL CERRAR_FACTURA(?)");
+        $stmt->execute([$numeroFactura]);
+    }
 
-        $detalle = $this->db->prepare("SELECT d.*, p.NOM_PRO, p.PRE_UNI_PRO 
-                                      FROM DETALLE_VENTAS d 
-                                      JOIN PRODUCTOS p ON d.COD_PRO_VEN = p.COD_PRO 
-                                      WHERE d.NUM_FAC_PER = :numero");
-        $detalle->execute(['numero' => $numeroFactura]);
-        $resultDetalle = $detalle->fetchAll(PDO::FETCH_ASSOC);
-
-        return [
-            'maestro' => $resultMaestro,
-            'detalle' => $resultDetalle
-        ];
+    public function getVentaCompleta($numeroFactura)
+    {
+        $sql = "SELECT mv.NUM_FAC, mv.FEC_FAC, mv.TOTAL, mv.ESTADO,
+                       c.NOM_CLI, c.APE_CLI,
+                       dv.CANTIDAD, p.NOM_PRO, p.PRE_UNI_PRO
+                FROM MAESTRO_VENTAS mv
+                JOIN CLIENTES c ON mv.CED_CLI_VEN = c.CED_CLI
+                JOIN DETALLE_VENTAS dv ON mv.NUM_FAC = dv.NUM_FAC_PER
+                JOIN PRODUCTOS p ON dv.COD_PRO_VEN = p.COD_PRO
+                WHERE mv.NUM_FAC = ?";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$numeroFactura]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
