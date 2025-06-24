@@ -79,7 +79,7 @@ class TestEscrituras
         $productos = $this->generateTestData();
         $cedulaCliente = '1234567890';
 
-        // Insertar 15 órdenes con 1 a 15 detalles cada una
+        // 15 ORDENES con 1 a 15 DETALLES cada una
         for ($detalles = 1; $detalles <= 15; $detalles++) {
             $this->startTimer();
 

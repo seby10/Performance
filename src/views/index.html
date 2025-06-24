@@ -80,9 +80,6 @@
                             <label class="form-label">Cantidad</label>
                             <input type="number" class="form-control" id="cantidad" value="1" min="1" title="Cantidad">
                         </div>
-                        <!-- <button class="btn btn-primary" onclick="agregarProducto()">
-                            Agregar al Carrito
-                        </button> -->
                     </div>
                 </div>
             </div>
@@ -100,16 +97,23 @@
                             <th>Producto</th>
                             <th>Cantidad</th>
                             <th>Precio Unit.</th>
-                            <th>Subtotal</th>
+                            <th>Precio Tot.</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="detalleVenta"></tbody>
                     <tfoot>
                         <tr>
+                            <td colspan="4" class="text-end"><strong>Subtotal:</strong></td>
+                            <td><span id="subtotalVenta">0.00</span></td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" class="text-end"><strong>Iva (15%): </strong></td>
+                            <td><span id="ivaVenta">0.00</span></td>
+                        </tr>
+                        <tr>
                             <td colspan="4" class="text-end"><strong>Total:</strong></td>
                             <td><span id="totalVenta">0.00</span></td>
-                            <td></td>
                         </tr>
                     </tfoot>
                 </table>

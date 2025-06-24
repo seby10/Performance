@@ -96,7 +96,6 @@ class EscrituraMasivaScript {
     }
 
     private function generateMassiveOrders($totalDetails) {
-        // Asumimos un promedio de 10 detalles por orden
         $totalOrders = ceil($totalDetails / 10);
         
         $this->startTimer();
@@ -158,7 +157,8 @@ class EscrituraMasivaScript {
                         
                         // Si alcanzamos el total requerido, salir
                         if (($batch * $this->batchSize * 10 + $detailsCount) >= $totalDetails) {
-                            break 3; // Salir de todos los bucles
+                            echo "Procesadas 1000000 de $totalDetails ordenes (100%) \n";
+                            break 3;
                         }
                     }
                 }
